@@ -1,0 +1,36 @@
+
+plugin.tx_authagainsttypo3_pi1 {
+	# Authentication of remote System
+	remoteIp = {$plugin.tx_authagainsttypo3_pi1.remoteIp}
+	serviceUser = {$plugin.tx_authagainsttypo3_pi1.serviceUser}
+	servicePass = {$plugin.tx_authagainsttypo3_pi1.servicePass}
+	# PID settings, List of PIDs to search for user
+	pid = {$plugin.tx_authagainsttypo3_pi1.pid}
+	
+	# Usergroups
+	fe_groups = {$plugin.tx_authagainsttypo3_pi1.fe_groups}
+	
+	# Comma Separated Fieldlist to give back as 
+	fields = username, name, email
+	
+	minRemoteVersion = {$plugin.tx_authagainsttypo3_pi1.minRemoteVersion}
+}
+
+# TS Template for Athentication
+#
+#
+#
+webservice = PAGE
+webservice {
+
+	typeNum = 65537
+	20 < plugin.tx_authagainsttypo3_pi1
+	config {
+		# disable all headers and comments
+		disableAllHeaderCode = 1
+		disablePrefixComment = 1
+		aditionalHeaders = Content-Type: text/xml
+		debug = 0
+		no_cache=1
+	}
+}

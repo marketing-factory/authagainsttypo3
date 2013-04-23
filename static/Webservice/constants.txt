@@ -1,0 +1,15 @@
+plugin.tx_authagainsttypo3_pi1 {
+	# cat=AuthAgainstTYPO3: General/links/a2;  type=string; label= remoteIp: List of IP-Addresses which are allowed to use this service
+	remoteIp = 192.168.*,127.0.0.1
+	# cat=AuthAgainstTYPO3: General/links/a2;  type=string; label= serviceUser: Username which should be posted for an authentication for this service
+	serviceUser = Service
+	# cat=AuthAgainstTYPO3: General/links/a2;  type=string; label= servicePassword: Pasword which should be posted for an authentication for this service
+	servicePass = Pass
+	# cat=AuthAgainstTYPO3: General/links/a2;  type=string; label= StoragePids: List of PIDs to search for fe_user
+	pid = 0
+	
+	# cat=AuthAgainstTYPO3: General/links/a2;  type=string; label=fe_groups: List of fe_group uids which are valid
+	fe_groups = 0
+	
+	minRemoteVersion = 1.0.0
+}
