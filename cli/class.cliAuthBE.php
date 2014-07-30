@@ -8,33 +8,17 @@ if (!defined('TYPO3_cliMode')) {
  * Class tx_cliAuthBE_cli
  */
 class tx_cliAuthBE_cli extends t3lib_cli {
-	public $extkey = 'authagainsttypo3';
 
 	/**
-	 * An instance of the salted hashing method.
-	 * This member is set in the getSaltingInstance() function.
-	 *
-	 * @var \TYPO3\CMS\Saltedpasswords\Salt\AbstractSalt
+	 * @var string
 	 */
-	protected $objInstanceSaltedPW = NULL;
-
-	/** @var float  */
-	public $t3Version = '4.0';
+	public $extkey = 'authagainsttypo3';
 
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
-
-		// Running parent class constructor
-		$this->t3Version = floatval($GLOBALS['TYPO3_VERSION']?$GLOBALS['TYPO3_VERSION']:
-				$GLOBALS['TYPO_VERSION'] ? $GLOBALS['TYPO_VERSION'] :$GLOBALS['TYPO3_CONF_VARS']['SYS']['compat_version']);
-
-		if ($this->t3Version >= 6.0) {
-			parent::__construct();
-		} else {
-			parent::t3lib_cli();
-		}
+		$this->cli_setArguments($_SERVER['argv']);
 
 		// Setting help texts:
 		$this->cli_help['name'] = 'cliAuthBE';
@@ -54,20 +38,21 @@ class tx_cliAuthBE_cli extends t3lib_cli {
 		// get task (function)
 		$task = (string)$this->cli_args['_DEFAULT'][1];
 
-		if (!$task) {
-			$this->cli_validateArgs();
-			$this->cli_help();
-			exit;
-		}
+		switch ($task) {
+			case 'authENV':
+				$credentials = $this->getEnv();
+				$this->authAgainstBe($credentials);
+				break;
 
-		if ($task == 'authENV') {
-			$credentials = $this->getEnv();
-			$this->authAgainstBe($credentials);
-		}
+			case 'authPARAM':
+				$credentials = $this->getCliArgs();
+				$this->authAgainstBe($credentials);
+				break;
 
-		if ($task == 'authPARAM') {
-			$credentials = $this->getCliArgs();
-			$this->authAgainstBe($credentials);
+			default:
+				$this->cli_validateArgs();
+				$this->cli_help();
+				exit;
 		}
 	}
 
@@ -78,22 +63,31 @@ class tx_cliAuthBE_cli extends t3lib_cli {
 	public function authAgainstBe($credentials) {
 		/** @var t3lib_db $database */
 		$database = $GLOBALS['TYPO3_DB'];
-
-		$result = $database->exec_SELECTgetRows(
-			'password, uid',
+		$user = $database->exec_SELECTgetSingleRow(
+			'*',
 			'be_users',
-			'username = ' . $database->fullQuoteStr($credentials['user'], 'be_users') . ' AND deleted=0 AND disable=0 '
+			'username = ' . $database->fullQuoteStr($credentials['user'], 'be_users')
 		);
 
-		if (count($result) === 1) {
-			if ($result[0]['password'] === md5($credentials['pass'])) {
-				print 'Valid User';
-				exit(0);
+		if (empty($user)) {
+			$error = 'Invalid user';
+			$exit = 1;
+		} else {
+			$error = 'Invalid password';
+			if (t3lib_extMgm::isLoaded('saltedpasswords') && tx_saltedpasswords_div::isUsageEnabled('BE')) {
+				$saltObject = tx_saltedpasswords_salts_factory::getSaltingInstance(NULL);
+				$exit = $saltObject->checkPassword($credentials['pass'], $user['password']) ? 0 : 1;
+			} else {
+				$exit = md5($credentials['pass']) == $user['password'] ? 0 : 1;
 			}
 		}
 
-		print 'Invalid User';
-		exit (1);
+		if ($exit) {
+			print $error;
+		} else {
+			print 'Valid login';
+		}
+		exit ($exit);
 	}
 
 	/**
