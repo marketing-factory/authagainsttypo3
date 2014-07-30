@@ -75,7 +75,13 @@ class tx_cliAuthBE_cli extends t3lib_cli {
 		} else {
 			$error = 'Invalid password';
 			if (t3lib_extMgm::isLoaded('saltedpasswords') && tx_saltedpasswords_div::isUsageEnabled('BE')) {
-				$saltObject = tx_saltedpasswords_salts_factory::getSaltingInstance(NULL);
+				$saltObject = NULL;
+				if (strpos($user['password'], '$1') === 0) {
+					$saltObject = tx_saltedpasswords_salts_factory::setPreferredHashingMethod('tx_saltedpasswords_salts_md5');
+				}
+				if (!is_object($saltObject)) {
+					$saltObject = tx_saltedpasswords_salts_factory::getSaltingInstance(NULL);
+				}
 				$exit = $saltObject->checkPassword($credentials['pass'], $user['password']) ? 0 : 1;
 			} else {
 				$exit = md5($credentials['pass']) == $user['password'] ? 0 : 1;
