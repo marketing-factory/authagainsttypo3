@@ -22,8 +22,6 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
-require_once(PATH_tslib.'class.tslib_pibase.php');
-
 
 /**
  * Plugin 'Auth Against TYPO3' for the 'authagainsttypo3' extension.
@@ -37,7 +35,7 @@ class tx_authagainsttypo3_pi1 extends tslib_pibase {
 	var $scriptRelPath = 'pi1/class.tx_authagainsttypo3_pi1.php';	// Path to this script relative to the extension dir.
 	var $extKey        = 'authagainsttypo3';	// The extension key.
 	var $pi_checkCHash = true;
-	
+
 	/**
 	 * The main method of the PlugIn
 	 *
@@ -53,40 +51,40 @@ class tx_authagainsttypo3_pi1 extends tslib_pibase {
 		$_EXTKEY = 'authagainsttypo3';
 		require_once(t3lib_extMgm::extPath('authagainsttypo3').'ext_emconf.php');
 
-		
+
 		$this->version = $EM_CONF['authagainsttypo3']['version'];
 		if (empty($this->version)) {
 			$this->version = '0.0.0';
 		}
-		
+
 		/**
 		 * build XML by hand is faster than using XML render methods
 		 *
 		 */
 		$xml= "<?xml version=\"1.0\" encoding=\"".$GLOBALS['TSFE']->renderCharset."\"?>\r\n";
-		
+
 		$xml.="<typo3>";
 		$xml.="<version nr='".$this->version."' />\r\n";
-		
+
 		/**
 		 * In a later Version, we could integrate a Version Check for the Auth Service,
 		 * when a new Version will be released with an new XML Structure
 		 */
-		
-		
+
+
 		/**
 		 * Acces-Check. Set IP, User and passwort in TS Constants
 		 */
-		
+
 		if ( t3lib_div::cmpIP($_SERVER['REMOTE_ADDR'],$this->conf['remoteIp']) &&
-			(t3lib_div::_POST('serviceUser') == $this->conf['serviceUser']) && 
-			(t3lib_div::_POST('servicePass') == $this->conf['servicePass']) 
+			(t3lib_div::_POST('serviceUser') == $this->conf['serviceUser']) &&
+			(t3lib_div::_POST('servicePass') == $this->conf['servicePass'])
 				) {
-			
+
 			/*
 			 * Intiantate lokal FE_user for auth
 			 */
-					
+
 			$this->lok_fe_user = t3lib_div::makeInstance('tslib_feUserAuth');
 
 			$this->lok_fe_user->lockIP = $this->TYPO3_CONF_VARS['FE']['lockIP'];
@@ -94,11 +92,11 @@ class tx_authagainsttypo3_pi1 extends tslib_pibase {
 			$this->lok_fe_user->checkPid = $this->TYPO3_CONF_VARS['FE']['checkFeUserPid'];
 			$this->lok_fe_user->lifetime = intval($this->TYPO3_CONF_VARS['FE']['lifetime']);
 			$this->lok_fe_user->checkPid_value = $GLOBALS['TYPO3_DB']->cleanIntList($this->conf['pid']);	// List of pid's acceptable
-			
-		
+
+
 			$this->lok_fe_user->dontSetCookie=1;
-		
-	
+
+
 			$this->lok_fe_user->start();
 			$this->lok_fe_user->unpack_uc('');
 			$this->lok_fe_user->fetchSessionData();	// Gets session data
@@ -107,14 +105,14 @@ class tx_authagainsttypo3_pi1 extends tslib_pibase {
 				$this->lok_fe_user->record_registration($recs, $this->TYPO3_CONF_VARS['FE']['maxSessionDataSize']);
 			}
 			$this->lok_fe_user->fetchGroupData ( );
-			
+
 			/*
 			 * calculate Groups
 			 */
-			
+
 			$gr_list = '0,-2';
 			if (is_array($this->lok_fe_user->user) && count($this->lok_fe_user->groupData['uid']))	{
-				
+
 				$gr_array = $this->lok_fe_user->groupData['uid'];
 				$gr_array = array_unique($gr_array);	// Make unique...
 				sort($gr_array);	// sort
@@ -124,7 +122,7 @@ class tx_authagainsttypo3_pi1 extends tslib_pibase {
 			}
 			$groupAuth = false;
 			if (!$this->conf['fe_groups']) {
-							
+
 				foreach (t3lib_div::trimExplode(',',$this->conf['fe_groups']) as $oneGroup) {
 					if (t3lib_div::inList( $this->lok_fe_user->user['usergroup'],$oneGroup)) {
 						$groupAuth = true;
@@ -133,9 +131,9 @@ class tx_authagainsttypo3_pi1 extends tslib_pibase {
 			}else{
 				$groupAuth = true;
 			}
-				
-		
-			
+
+
+
 			if (is_array($this->lok_fe_user->user)){
 				if ($this->conf['fields']) {
 					$fields = t3lib_div::trimExplode(',',$this->conf['fields']);
@@ -145,16 +143,16 @@ class tx_authagainsttypo3_pi1 extends tslib_pibase {
 				foreach ($fields as $oneField) {
 					$user[trim($oneField)] = $this->lok_fe_user->user[trim($oneField)];
 				}
-				$xml .=t3lib_div::array2xml($user,'',0,'fe_user'); 
+				$xml .=t3lib_div::array2xml($user,'',0,'fe_user');
 			}else{
 				$xml .="<error id='1000'>The given TYPO3 Username and Passwort did not match for the configured Storage PID</error>";
 			}
-		
+
 		}else{
 			$xml .= "<error id='9000'>You are not allowed to use this service</error>";
 		}
 		$xml.="</typo3>";
-	
+
 		return($xml);
 	}
 }
