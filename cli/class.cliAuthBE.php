@@ -68,7 +68,7 @@ class tx_cliAuthBE_cli extends t3lib_cli {
 		$user = $database->exec_SELECTgetSingleRow(
 			'*',
 			'be_users',
-			'username = ' . $database->fullQuoteStr($credentials['user'], 'be_users')
+			'username = ' . $database->fullQuoteStr($credentials['user'], 'be_users') . ' AND disable = 0 AND deleted = 0'
 		);
 
 		if (empty($user)) {
