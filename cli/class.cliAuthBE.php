@@ -61,6 +61,8 @@ class tx_cliAuthBE_cli extends t3lib_cli {
 	 * @return void
 	 */
 	public function authAgainstBe($credentials) {
+		$password = $credentials['pass'];
+
 		/** @var t3lib_db $database */
 		$database = $GLOBALS['TYPO3_DB'];
 		$user = $database->exec_SELECTgetSingleRow(
@@ -71,7 +73,7 @@ class tx_cliAuthBE_cli extends t3lib_cli {
 
 		if (empty($user)) {
 			$error = 'Invalid user';
-			$exit = 1;
+			$validPasswd = 0;
 		} else {
 			$error = 'Invalid password';
 			if (t3lib_extMgm::isLoaded('saltedpasswords') && tx_saltedpasswords_div::isUsageEnabled('BE')) {
@@ -82,18 +84,33 @@ class tx_cliAuthBE_cli extends t3lib_cli {
 				if (!is_object($saltObject)) {
 					$saltObject = tx_saltedpasswords_salts_factory::getSaltingInstance($user['password']);
 				}
-				$exit = !$saltObject->checkPassword($credentials['pass'], $user['password']);
+				if (is_object($saltObject)) {
+					$validPasswd = $saltObject->checkPassword($password, $user['password']);
+				} else {
+					if (t3lib_div::inList('C$,M$', substr($user['password'], 0, 2))) {
+						// Instanciate default method class
+						$saltObject = tx_saltedpasswords_salts_factory::getSaltingInstance(substr($user['password'], 1));
+						// md5
+						if ($user['password'][0] === 'M') {
+							$validPasswd = $saltObject->checkPassword(md5($password), substr($user['password'], 1));
+						} else {
+							$validPasswd = $saltObject->checkPassword($password, substr($user['password'], 1));
+						}
+					} else {
+						$validPasswd = 0;
+					}
+				}
 			} else {
-				$exit = !(md5($credentials['pass']) == $user['password']);
+				$validPasswd = md5($password) == $user['password'];
 			}
 		}
 
-		if ($exit) {
+		if (!$validPasswd) {
 			print $error;
 		} else {
 			print 'Valid login';
 		}
-		exit ((int)$exit);
+		exit ((int)!$validPasswd);
 	}
 
 	/**
