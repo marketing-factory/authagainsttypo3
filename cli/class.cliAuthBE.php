@@ -80,11 +80,11 @@ class tx_cliAuthBE_cli extends t3lib_cli {
 					$saltObject = tx_saltedpasswords_salts_factory::setPreferredHashingMethod('tx_saltedpasswords_salts_md5');
 				}
 				if (!is_object($saltObject)) {
-					$saltObject = tx_saltedpasswords_salts_factory::getSaltingInstance(NULL);
+					$saltObject = tx_saltedpasswords_salts_factory::getSaltingInstance($user['password']);
 				}
-				$exit = $saltObject->checkPassword($credentials['pass'], $user['password']) ? 0 : 1;
+				$exit = !$saltObject->checkPassword($credentials['pass'], $user['password']);
 			} else {
-				$exit = md5($credentials['pass']) == $user['password'] ? 0 : 1;
+				$exit = !(md5($credentials['pass']) == $user['password']);
 			}
 		}
 
@@ -93,7 +93,7 @@ class tx_cliAuthBE_cli extends t3lib_cli {
 		} else {
 			print 'Valid login';
 		}
-		exit ($exit);
+		exit ((int)$exit);
 	}
 
 	/**
