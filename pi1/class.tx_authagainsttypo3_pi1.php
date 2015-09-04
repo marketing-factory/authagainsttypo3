@@ -49,7 +49,7 @@ class tx_authagainsttypo3_pi1 extends tslib_pibase {
 		$this->pi_loadLL();
 		# Read Version information by loading ext_emconf.php
 		$_EXTKEY = 'authagainsttypo3';
-		require_once(t3lib_extMgm::extPath('authagainsttypo3').'ext_emconf.php');
+		require_once(TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('authagainsttypo3').'ext_emconf.php');
 
 
 		$this->version = $EM_CONF['authagainsttypo3']['version'];
@@ -76,16 +76,16 @@ class tx_authagainsttypo3_pi1 extends tslib_pibase {
 		 * Acces-Check. Set IP, User and passwort in TS Constants
 		 */
 
-		if ( t3lib_div::cmpIP($_SERVER['REMOTE_ADDR'],$this->conf['remoteIp']) &&
-			(t3lib_div::_POST('serviceUser') == $this->conf['serviceUser']) &&
-			(t3lib_div::_POST('servicePass') == $this->conf['servicePass'])
+		if ( \TYPO3\CMS\Core\Utility\GeneralUtility::cmpIP($_SERVER['REMOTE_ADDR'],$this->conf['remoteIp']) &&
+			(\TYPO3\CMS\Core\Utility\GeneralUtility::_POST('serviceUser') == $this->conf['serviceUser']) &&
+			(\TYPO3\CMS\Core\Utility\GeneralUtility::_POST('servicePass') == $this->conf['servicePass'])
 				) {
 
 			/*
 			 * Intiantate lokal FE_user for auth
 			 */
 
-			$this->lok_fe_user = t3lib_div::makeInstance('tslib_feUserAuth');
+			$this->lok_fe_user = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('tslib_feUserAuth');
 
 			$this->lok_fe_user->lockIP = $this->TYPO3_CONF_VARS['FE']['lockIP'];
 			$this->lok_fe_user->lockHashKeyWords = $this->TYPO3_CONF_VARS['FE']['lockHashKeyWords'];
@@ -100,7 +100,7 @@ class tx_authagainsttypo3_pi1 extends tslib_pibase {
 			$this->lok_fe_user->start();
 			$this->lok_fe_user->unpack_uc('');
 			$this->lok_fe_user->fetchSessionData();	// Gets session data
-			$recs = t3lib_div::_GP('recs');
+			$recs = \TYPO3\CMS\Core\Utility\GeneralUtility::_GP('recs');
 			if (is_array($recs))	{	// If any record registration is submitted, register the record.
 				$this->lok_fe_user->record_registration($recs, $this->TYPO3_CONF_VARS['FE']['maxSessionDataSize']);
 			}
@@ -123,8 +123,8 @@ class tx_authagainsttypo3_pi1 extends tslib_pibase {
 			$groupAuth = false;
 			if (!$this->conf['fe_groups']) {
 
-				foreach (t3lib_div::trimExplode(',',$this->conf['fe_groups']) as $oneGroup) {
-					if (t3lib_div::inList( $this->lok_fe_user->user['usergroup'],$oneGroup)) {
+				foreach (\TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',',$this->conf['fe_groups']) as $oneGroup) {
+					if (\TYPO3\CMS\Core\Utility\GeneralUtility::inList( $this->lok_fe_user->user['usergroup'],$oneGroup)) {
 						$groupAuth = true;
 					}
 				}
@@ -136,14 +136,14 @@ class tx_authagainsttypo3_pi1 extends tslib_pibase {
 
 			if (is_array($this->lok_fe_user->user)){
 				if ($this->conf['fields']) {
-					$fields = t3lib_div::trimExplode(',',$this->conf['fields']);
+					$fields = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',',$this->conf['fields']);
 				}else{
 					$fields = array_keys($this->lok_fe_user->user);
 				}
 				foreach ($fields as $oneField) {
 					$user[trim($oneField)] = $this->lok_fe_user->user[trim($oneField)];
 				}
-				$xml .=t3lib_div::array2xml($user,'',0,'fe_user');
+				$xml .=\TYPO3\CMS\Core\Utility\GeneralUtility::array2xml($user,'',0,'fe_user');
 			}else{
 				$xml .="<error id='1000'>The given TYPO3 Username and Passwort did not match for the configured Storage PID</error>";
 			}
