@@ -123,7 +123,7 @@ not match for the configured Storage PID</error>';
 
         // Read Version information by loading ext_emconf.php
         $_EXTKEY = $this->extKey;
-        $a = require_once(ExtensionManagementUtility::extPath('authagainsttypo3') . 'ext_emconf.php');
+        require_once(ExtensionManagementUtility::extPath('authagainsttypo3') . 'ext_emconf.php');
 
         $this->version = $EM_CONF['authagainsttypo3']['version'];
         if (empty($this->version)) {
