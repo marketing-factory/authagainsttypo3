@@ -1,15 +1,17 @@
 <?php
+namespace Mfc\AuthAgainstTypo3\Command;
 
-if (!defined('TYPO3_cliMode')) {
-    die('You cannot run this script directly!');
-}
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Saltedpasswords\Salt\SaltFactory;
+use TYPO3\CMS\Saltedpasswords\Utility\SaltedPasswordsUtility;
+use TYPO3\CMS\Core\Database\DatabaseConnection;
 
 /**
- * Class tx_cliAuthBE_cli
+ * Class AuthenticateCommand
  */
-class tx_cliAuthBE_cli extends \TYPO3\CMS\Core\Controller\CommandLineController
+class AuthenticateCommand extends \TYPO3\CMS\Core\Controller\CommandLineController
 {
-
     /**
      * @var string
      */
@@ -20,24 +22,23 @@ class tx_cliAuthBE_cli extends \TYPO3\CMS\Core\Controller\CommandLineController
      */
     public function __construct()
     {
-        $this->cli_setArguments($_SERVER['argv']);
+        parent::__construct();
 
         // Setting help texts:
         $this->cli_help['name'] = 'cliAuthBE';
-        $this->cli_help['synopsis'] = '###OPTIONS###';
+        $this->cli_help['synopsis'] = 'authENV, authPARAM';
         $this->cli_help['description'] = 'Auth CLI Script for using mod-auth-external. ' .
-            'USER and PASS must be set via Environement';
-        $this->cli_help['examples'] = '/.../cli_dispatch.phpsh EXTKEY TASK';
+            'USER and PASS must be set via Environment';
+        $this->cli_help['examples'] = '/.../cli_dispatch.phpsh authagainsttypo3';
         $this->cli_help['author'] = 'Ingo Schmitt, (c) 2012';
     }
 
     /**
      * CLI engine
      *
-     * @param array $argv Command line arguments
      * @return string
      */
-    public function cliMain($argv)
+    public function cliMain()
     {
         // get task (function)
         $task = (string)$this->cli_args['_DEFAULT'][1];
@@ -68,12 +69,10 @@ class tx_cliAuthBE_cli extends \TYPO3\CMS\Core\Controller\CommandLineController
     {
         $password = $credentials['pass'];
 
-        /** @var \TYPO3\CMS\Core\Database\DatabaseConnection $database */
-        $database = $GLOBALS['TYPO3_DB'];
-        $user = $database->exec_SELECTgetSingleRow(
+        $user = $this->getDatabaseConnection()->exec_SELECTgetSingleRow(
             '*',
             'be_users',
-            'username = ' . $database->fullQuoteStr(
+            'username = ' . $this->getDatabaseConnection()->fullQuoteStr(
                 $credentials['user'],
                 'be_users'
             ) . ' AND disable = 0 AND deleted = 0'
@@ -81,25 +80,25 @@ class tx_cliAuthBE_cli extends \TYPO3\CMS\Core\Controller\CommandLineController
 
         if (empty($user)) {
             $error = 'Invalid user';
-            $validPasswd = 0;
+            $validPassword = 0;
         } else {
             $error = 'Invalid password';
-            if (TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded('saltedpasswords') &&
-                \TYPO3\CMS\Saltedpasswords\Utility\SaltedPasswordsUtility::isUsageEnabled('BE')
+            if (ExtensionManagementUtility::isLoaded('saltedpasswords') &&
+                SaltedPasswordsUtility::isUsageEnabled('BE')
             ) {
                 $saltObject = null;
                 if (strpos($user['password'], '$1') === 0) {
-                    $saltObject = \TYPO3\CMS\Saltedpasswords\Salt\SaltFactory::setPreferredHashingMethod('tx_saltedpasswords_salts_md5');
+                    $saltObject = SaltFactory::setPreferredHashingMethod('tx_saltedpasswords_salts_md5');
                 }
                 if (!is_object($saltObject)) {
-                    $saltObject = \TYPO3\CMS\Saltedpasswords\Salt\SaltFactory::getSaltingInstance($user['password']);
+                    $saltObject = SaltFactory::getSaltingInstance($user['password']);
                 }
                 if (is_object($saltObject)) {
-                    $validPasswd = $saltObject->checkPassword($password, $user['password']);
+                    $validPassword = $saltObject->checkPassword($password, $user['password']);
                 } else {
-                    if (\TYPO3\CMS\Core\Utility\GeneralUtility::inList('C$,M$', substr($user['password'], 0, 2))) {
-                        // Instanciate default method class
-                        $saltObject = \TYPO3\CMS\Saltedpasswords\Salt\SaltFactory::getSaltingInstance(
+                    if (GeneralUtility::inList('C$,M$', substr($user['password'], 0, 2))) {
+                        // Instantiate default method class
+                        $saltObject = SaltFactory::getSaltingInstance(
                             substr(
                                 $user['password'],
                                 1
@@ -107,28 +106,31 @@ class tx_cliAuthBE_cli extends \TYPO3\CMS\Core\Controller\CommandLineController
                         );
                         // md5
                         if ($user['password'][0] === 'M') {
-                            $validPasswd = $saltObject->checkPassword(md5($password), substr($user['password'], 1));
+                            $validPassword = $saltObject->checkPassword(md5($password), substr($user['password'], 1));
                         } else {
-                            $validPasswd = $saltObject->checkPassword($password, substr($user['password'], 1));
+                            $validPassword = $saltObject->checkPassword($password, substr($user['password'], 1));
                         }
                     } else {
-                        $validPasswd = 0;
+                        $validPassword = 0;
                     }
                 }
             } else {
-                $validPasswd = md5($password) == $user['password'];
+                $validPassword = md5($password) == $user['password'];
             }
         }
 
-        if (!$validPasswd) {
+        if (!$validPassword) {
             print $error;
         } else {
             print 'Valid login';
         }
-        exit ((int)!$validPasswd);
+
+        exit ((int)!$validPassword);
     }
 
     /**
+     * Get environment values
+     *
      * @return array
      */
     public function getEnv()
@@ -140,6 +142,8 @@ class tx_cliAuthBE_cli extends \TYPO3\CMS\Core\Controller\CommandLineController
     }
 
     /**
+     * Get console arguments
+     *
      * @return array
      */
     public function getCliArgs()
@@ -149,8 +153,17 @@ class tx_cliAuthBE_cli extends \TYPO3\CMS\Core\Controller\CommandLineController
 
         return array('user' => $user, 'pass' => $pass);
     }
+
+
+    /**
+     * @return DatabaseConnection
+     */
+    protected function getDatabaseConnection()
+    {
+        return $GLOBALS['TYPO3_DB'];
+    }
 }
 
-// Call the functionality
-$cleanerObj = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('tx_cliAuthBE_cli');
-$cleanerObj->cliMain($_SERVER['argv']);
+/** @var \Mfc\AuthAgainstTypo3\Command\AuthenticateCommand $command */
+$command = GeneralUtility::makeInstance('Mfc\\AuthAgainstTypo3\\Command\\AuthenticateCommand');
+$command->cliMain();
