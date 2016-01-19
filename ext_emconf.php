@@ -29,10 +29,10 @@ $EM_CONF[$_EXTKEY] = array(
 	'clearCacheOnLoad' => 0,
 	'lockType' => '',
 	'author_company' => 'Marketing Factory Consulting GmbH',
-	'version' => '1.0.0',
+	'version' => '1.0.0-4.5',
 	'constraints' => array(
 		'depends' => array (
-			'typo3' => '4.5.0-6.2.99',
+			'typo3' => '4.5.0-4.5.99',
 		),
 		'conflicts' => array(
 		),

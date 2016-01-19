@@ -18,7 +18,7 @@ class tx_cliAuthBE_cli extends t3lib_cli {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->cli_setArguments($_SERVER['argv']);
+		$this->cli_args = $this->cli_getArgIndex();
 
 		// Setting help texts:
 		$this->cli_help['name'] = 'cliAuthBE';
