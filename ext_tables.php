@@ -1,5 +1,15 @@
 <?php
-if (!defined ('TYPO3_MODE')) 	die ('Access denied.');
+defined('TYPO3_MODE') or die('Access denied.');
 
-TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addStaticFile($_EXTKEY,'static/Webservice/', 'Auth Webservice');
-?>
+\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addStaticFile(
+    'authagainsttypo3',
+    'Configuration/TypoScript',
+    'Auth Webservice'
+);
+
+/**
+ * Page TypoScript for mod wizards
+ */
+\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPageTSConfig('
+    <INCLUDE_TYPOSCRIPT: source="FILE:EXT:authagainsttypo3/Configuration/TsConfig/ModWizards.ts">
+');
