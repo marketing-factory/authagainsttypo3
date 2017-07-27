@@ -1,0 +1,16 @@
+{
+  "name": "mfc/authagainsttypo3",
+  "type": "typo3-cms-extension",
+  "version": "1.0.0",
+
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Simon Schmidt",
+      "email": "typo3@marketing-factory.de"
+    }
+  ],
+  "require": {
+    "php": ">=5.5.0"
+  }
+}
