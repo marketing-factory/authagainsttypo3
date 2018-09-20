@@ -40,11 +40,11 @@ USER and PASS must be set via environement or commandline arguments.',
     {
         switch ($argv[1]) {
             case 'authENV':
-                $this->authenticateAgainstBackendUsers($this->getCredentialsFromEnvironment());
+               	$this->authENV();
                 break;
 
             case 'authPARAM':
-                $this->authenticateAgainstBackendUsers($this->getCredentialsFromCommandlineArguments($argv));
+                $this->authPARAM($argv);
                 break;
 
             default:
@@ -53,6 +53,14 @@ USER and PASS must be set via environement or commandline arguments.',
                 exit;
         }
     }
+
+    public function authENV() {
+		$this->authenticateAgainstBackendUsers($this->getCredentialsFromEnvironment());
+	}
+
+    public function authPARAM($arguments) {
+		$this->authenticateAgainstBackendUsers($this->getCredentialsFromCommandlineArguments($arguments));
+	}
 
     /**
      * @param $loginData

@@ -16,3 +16,5 @@ if (TYPO3_MODE === 'BE') {
         '_CLI_user'
     );
 }
+
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['extbase']['commandControllers'][] = \Mfc\Authagainsttypo3\Controller\AuthentificationCommandController::class;
