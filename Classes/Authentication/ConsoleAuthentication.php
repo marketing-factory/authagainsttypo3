@@ -187,8 +187,10 @@ USER and PASS must be set via environement or commandline arguments.',
         $auth =& $GLOBALS['T3_SERVICES']['auth'];
 
         unset($auth['tx_beuseriprange_sv1']);
+        unset($auth['Mfc\\BeuserIprange\\Services\\AuthenticationService']);
         unset($auth['TYPO3\\CMS\\Rsaauth\\RsaAuthService']);
         unset($auth['Mfc\\MfcBeloginCaptcha\\Service\\CaptchaService']);
+        unset($auth['Mfc\\OAuth2\Services\\OAuth2LoginService']);
     }
 
     /**
