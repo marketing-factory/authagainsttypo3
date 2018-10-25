@@ -5,7 +5,7 @@ $EM_CONF['authagainsttypo3'] = array(
     'description' => 'Provides a Webservice which can be used to Athanticate against TYPO3 FE Users',
     'category' => 'fe',
     'state' => 'stable',
-    'version' => '4.1.1',
+    'version' => '4.1.2',
 
     'author' => 'Ingo Schmitt',
     'author_email' => 'typo3@marketing-factory.de',
