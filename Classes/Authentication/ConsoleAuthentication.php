@@ -3,6 +3,7 @@ namespace Mfc\Authagainsttypo3\Authentication;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Saltedpasswords\Salt\SaltFactory;
+use TYPO3\CMS\Core\Database\ConnectionPool;
 
 /**
  * Class ConsoleAuthentication
@@ -77,7 +78,7 @@ USER and PASS must be set via environement or commandline arguments.',
         } else {
             $error = 'Invalid password';
             $this->removeProblematicServices();
-            $this->updatePasswordWithCurrentSaltingMethod($userData);
+            $this->updatePasswordWithCurrentSaltingMethod($userData, $loginData);
 
             $authenticated = $this->authenticateWithAuthServices($userData, $loginData);
             $authenticated = $this->authenticateWithMd5($userData, $loginData, $authenticated);
@@ -96,23 +97,29 @@ USER and PASS must be set via environement or commandline arguments.',
      *
      * @return void
      */
-    protected function updatePasswordWithCurrentSaltingMethod(&$userData)
+    protected function updatePasswordWithCurrentSaltingMethod(&$userData, $loginData)
     {
-        if (!$this->passwordIsPlaintext($userData['password'])) {
-            return;
-        }
+		if (!$this->passwordIsPlaintext($userData['password'])) {
 
-        $saltFactory = SaltFactory::getSaltingInstance(null, 'BE');
-        $userData['password'] = $saltFactory->getHashedPassword($userData['password']);
+			$objInstanceSaltedPW = \TYPO3\CMS\Saltedpasswords\Salt\SaltFactory::getSaltingInstance($userData['password'], 'BE');
 
-        $this->getDatabaseConnection()->exec_UPDATEquery(
-            'be_users',
-            'disable = 0 AND deleted = 0 AND username = ' . $this->getDatabaseConnection()->fullQuoteStr(
-                $userData['username'],
-                'be_users'
-            ),
-            array('password' => $userData['password'])
-        );
+			if (!is_object($objInstanceSaltedPW)) {
+				return;
+			}
+			$validPasswd = $objInstanceSaltedPW->checkPassword($loginData['uident_text'], $userData['password']);
+			$defaultHashingClassName = \TYPO3\CMS\Saltedpasswords\Utility\SaltedPasswordsUtility::getDefaultSaltingHashingMethod();
+
+			if ($validPasswd && get_class($objInstanceSaltedPW) !== $defaultHashingClassName && !is_subclass_of($objInstanceSaltedPW, $defaultHashingClassName)) {
+				// Instantiate default method class
+				$objInstanceSaltedPW = \TYPO3\CMS\Saltedpasswords\Salt\SaltFactory::getSaltingInstance(null, 'BE');
+				$userData['password'] = $objInstanceSaltedPW->getHashedPassword($loginData['uident_text']);
+				$this->updatePassword((int)$userData['uid'], ['password' => $userData['password']]);
+			}
+		} elseif ($loginData['uident_text'] === $userData['password']){
+			$objInstanceSaltedPW = \TYPO3\CMS\Saltedpasswords\Salt\SaltFactory::getSaltingInstance(null, 'BE');
+			$userData['password'] = $objInstanceSaltedPW->getHashedPassword($loginData['uident_text']);
+			$this->updatePassword((int)$userData['uid'], ['password' => $userData['password']]);
+		}
     }
 
     /**
@@ -270,4 +277,28 @@ USER and PASS must be set via environement or commandline arguments.',
     {
         return $GLOBALS['TYPO3_DB'];
     }
+
+	/**
+	 * Method updates a FE/BE user record - in this case a new password string will be set.
+	 *
+	 * @param int $uid uid of user record that will be updated
+	 * @param mixed $updateFields Field values as key=>value pairs to be updated in database
+	 */
+	protected function updatePassword($uid, $updateFields)
+	{
+		$connection = GeneralUtility::makeInstance(ConnectionPool::class)
+			->getConnectionForTable('be_users');
+
+		$connection->update(
+			'be_users',
+			$updateFields,
+			['uid' => (int)$uid]
+		);
+
+		GeneralUtility::devLog(
+			sprintf('Automatic password update for user record in %s with uid %u', $this->pObj->user_table, $uid),
+			$this->extKey,
+			1
+		);
+	}
 }
