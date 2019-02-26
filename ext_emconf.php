@@ -1,9 +1,9 @@
 <?php
 
 $EM_CONF['authagainsttypo3'] = array(
-    'title' => 'Auth Against TYPO3',
-    'description' => 'Provides a Webservice which can be used to Athanticate against TYPO3 FE Users',
-    'category' => 'fe',
+    'title' => 'auth against TYPO3',
+    'description' => 'Provides an CLI command that provides authentication against TYPO3 backend users',
+    'category' => 'cli',
     'state' => 'stable',
     'version' => '5.0.0',
 

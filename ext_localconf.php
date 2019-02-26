@@ -8,13 +8,3 @@ defined('TYPO3_MODE') or die('Access denied.');
     'list_type',
     0
 );
-
-if (TYPO3_MODE === 'BE') {
-    // registers login at the cli_dispatcher with key "authagainsttypo3".
-    $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['GLOBAL']['cliKeys']['authagainsttypo3'] = array(
-        'EXT:authagainsttypo3/Scripts/CommandLineLauncher.php',
-        '_CLI_user'
-    );
-}
-
-$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['extbase']['commandControllers'][] = \Mfc\Authagainsttypo3\Controller\AuthentificationCommandController::class;
