@@ -13,7 +13,7 @@ $EM_CONF['authagainsttypo3'] = array(
 
     'constraints' => array(
         'depends' => array(
-            'typo3' => '8.7.0-8.99.99',
+            'typo3' => '8.7.0-9.5.99',
         ),
         'conflicts' => array(),
         'suggests' => array(),
