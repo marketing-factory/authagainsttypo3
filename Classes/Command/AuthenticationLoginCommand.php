@@ -28,11 +28,18 @@ class AuthenticationLoginCommand extends Command
         $this->cliAuthenticationService = GeneralUtility::makeInstance(CliAuthenticationService::class);
     }
 
+    protected function configure()
+    {
+        $this
+            ->setDescription('Authenticate backend user through mod_authnz_external');
+    }
+
+
     public function execute(InputInterface $input, OutputInterface $output)
     {
         try {
             $user = (string)getenv('USER');
-            $password = (string)getenv('PASSWORD');
+            $password = (string)getenv('PASS');
 
             if ($this->cliAuthenticationService->authenticateUser($user, $password)) {
                 exit(0);
