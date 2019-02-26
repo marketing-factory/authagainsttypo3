@@ -1,7 +1,15 @@
 <?php
-if (!defined ('TYPO3_MODE')) 	die ('Access denied.');
-#t3lib_div::loadTCA('tt_content');
-#$TCA['tt_content']['types']['list']['subtypes_excludelist'][$_EXTKEY.'_pi1']='layout,select_key';
-#t3lib_extMgm::addPlugin(array('LLL:EXT:authagainsttypo3/locallang_db.xml:tt_content.list_type_pi1', $_EXTKEY.'_pi1'),'list_type');
-t3lib_extMgm::addStaticFile($_EXTKEY,'static/Webservice/', 'Auth Webservice');
-?>
+defined('TYPO3_MODE') or die('Access denied.');
+
+\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addStaticFile(
+    'authagainsttypo3',
+    'Configuration/TypoScript',
+    'Auth Webservice'
+);
+
+/**
+ * Page TypoScript for mod wizards
+ */
+\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPageTSConfig('
+    <INCLUDE_TYPOSCRIPT: source="FILE:EXT:authagainsttypo3/Configuration/TsConfig/ModWizards.ts">
+');

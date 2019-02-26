@@ -1,16 +1,25 @@
 {
   "name": "mfc/authagainsttypo3",
   "type": "typo3-cms-extension",
-  "version": "1.0.0",
-
   "license": "proprietary",
   "authors": [
     {
       "name": "Simon Schmidt",
       "email": "typo3@marketing-factory.de"
+    },
+    {
+      "name": "Christian Spoo",
+      "email": "cs@marketing-factory.de"
     }
   ],
   "require": {
-    "php": ">=5.5.0"
+    "php": "^7.0.0",
+    "helhum/typo3-console": "^5.1.0",
+	"typo3/cms-core": "^8.7||^9.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "Mfc\\Authagainsttypo3\\": "Classes/"
+    }
   }
 }

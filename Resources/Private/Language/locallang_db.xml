@@ -6,7 +6,8 @@
 	</meta>
 	<data type="array">
 		<languageKey index="default" type="array">
-			<label index="tt_content.list_type_pi1">Auth Against TYPO3</label>
+			<label index="tt_content.authagainsttypo3_login">Auth Against TYPO3</label>
+			<label index="tt_content.authagainsttypo3_login.wiz_description">Webservice to authenticate from outsite against typo3</label>
 		</languageKey>
 	</data>
 </T3locallang>
