@@ -37,7 +37,7 @@ class CliAuthenticationService
         $blacklistedAuthServices = [
             'Mfc\\OAuth2\\Services\\OAuth2LoginService',
             'Mfc\\MfcBeloginCaptcha\\Service\\CaptchaService',
-            'Mfc\\BeuserIprange\\Service\\AuthenticationService'
+            'Mfc\\BeuserIprange\\Services\\AuthenticationService'
         ];
 
         /** @var AbstractAuthenticationService $authService */
