@@ -36,7 +36,8 @@ class CliAuthenticationService
         // We intentionally do not use ::class here since that would require all listed classes to be actually present
         $blacklistedAuthServices = [
             'Mfc\\OAuth2\\Services\\OAuth2LoginService',
-            'Mfc\\MfcBeloginCaptcha\\Service\\CaptchaService'
+            'Mfc\\MfcBeloginCaptcha\\Service\\CaptchaService',
+            'Mfc\\BeuserIprange\\Service\\AuthenticationService'
         ];
 
         /** @var AbstractAuthenticationService $authService */
