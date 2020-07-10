@@ -5,7 +5,7 @@ $EM_CONF['authagainsttypo3'] = array(
     'description' => 'Provides an CLI command that provides authentication against TYPO3 backend users',
     'category' => 'cli',
     'state' => 'stable',
-    'version' => '5.0.5',
+    'version' => '5.1.0',
 
     'author' => 'Ingo Schmitt',
     'author_email' => 'typo3@marketing-factory.de',
@@ -13,7 +13,7 @@ $EM_CONF['authagainsttypo3'] = array(
 
     'constraints' => array(
         'depends' => array(
-            'typo3' => '8.7.0-9.5.99',
+            'typo3' => '8.7.0-10.4.99',
         ),
         'conflicts' => array(),
         'suggests' => array(),

@@ -14,8 +14,8 @@
   ],
   "require": {
     "php": "^7.0.0",
-    "helhum/typo3-console": "^5.1.0",
-	"typo3/cms-core": "^8.7||^9.5"
+    "helhum/typo3-console": "^5.1.0||^6.1.0 ",
+    "typo3/cms-core": "^8.7||^9.5||^10.4"
   },
   "autoload": {
     "psr-4": {
