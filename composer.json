@@ -17,6 +17,11 @@
     "helhum/typo3-console": "^5.1.0||^6.1.0 ",
     "typo3/cms-core": "^8.7||^9.5||^10.4"
   },
+  "extra": {
+    "typo3/cms": {
+      "extension-key": "authagainsttypo3"
+    }
+  },
   "autoload": {
     "psr-4": {
       "Mfc\\Authagainsttypo3\\": "Classes/"
